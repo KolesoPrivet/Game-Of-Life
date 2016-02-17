@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Game_Of_Life
 {
@@ -15,7 +10,12 @@ namespace Game_Of_Life
         private int _xStep = 10;
         private int _yStep = 10;
         private bool _createFlag;
-        internal bool[,] universe; //Размер вселенной
+        private int _countLive = 0;
+        private int _countDead = 0;
+        internal bool[,] universe;
+
+        internal int CountLive { get { return _countLive; } set { _countLive = value; } }
+        internal int CountDead { get { return _countDead; } set { _countDead = value; } }
 
         internal int X { get { return x; } set { x = value; } }
         internal int Y { get { return y; } set { y = value; } }
@@ -25,17 +25,18 @@ namespace Game_Of_Life
         internal int YStep { get { return _yStep; } set { _yStep = value; } }
         internal int XStep { get { return _xStep; } set { _xStep = value; } }
 
-        private Form1 form;
+        private MainForm form;
         #endregion
 
-        public Rules(Form1 form)
+        public Rules(MainForm form)
         {
             this.form = form;
         }
 
-        //DONE
         public void CreateUniverse()
         {
+            _countLive = 0;
+            _countDead = 0;
 
             X = 75;
             Y = 50;
@@ -66,7 +67,6 @@ namespace Game_Of_Life
 
         }
 
-        //DONE
         public void ShowLives()
         {
             Image img = form.pictureBox.Image;
@@ -86,7 +86,6 @@ namespace Game_Of_Life
             form.pictureBox.Image = img;
         }
 
-        //DONE
         public int LiveNeighborsCount(bool[,] curUniverse, int x, int y)
         {
             int tmp = 0;
@@ -130,7 +129,6 @@ namespace Game_Of_Life
             return tmp;
         }
 
-        //DONE
         public void CreatePopulation()
         {
             Random r = new Random(DateTime.Now.Millisecond);
@@ -145,6 +143,60 @@ namespace Game_Of_Life
             ShowLives();
 
             _createFlag = true;
+        }
+
+        public void LabelCount()
+        {
+            _countLive = 0;
+
+            for ( int i = 0; i < X; i++ )
+            {
+                for ( int j = 0; j < Y; j++ )
+                {
+                    if (universe[i, j] == true)
+                        _countLive++;
+                }
+            }
+        }
+
+        public void NextGen()
+        {
+            bool[,] nextGenUniverse = new bool[X, Y];
+
+            for ( int i = 0; i < X; i++ )
+            {
+                for ( int j = 0; j < Y; j++ )
+                {
+                    if ( LiveNeighborsCount(universe, i, j) == 3 )
+                    {
+                        if ( !universe[i, j] )
+                            nextGenUniverse[i, j] = true;
+                    }
+                }
+            }
+
+            for ( int i = 0; i < X; i++ )
+            {
+                for ( int j = 0; j < Y; j++ )
+                {
+                    if ( universe[i, j] )
+                    {
+                        if (LiveNeighborsCount(universe, i, j) == 3 ||
+                            LiveNeighborsCount(universe, i, j) == 2)
+                            nextGenUniverse[i, j] = true;
+                        else
+                        {
+                            nextGenUniverse[i, j] = false;
+                            _countDead++;
+                        }
+
+                    }
+                }
+            }
+
+            universe = nextGenUniverse;
+
+            ShowLives();
         }
     }
 }
