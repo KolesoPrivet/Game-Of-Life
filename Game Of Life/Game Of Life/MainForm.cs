@@ -8,6 +8,7 @@ namespace Game_Of_Life
     {
         private readonly Rules rules;
         private readonly Stopwatch _stopwatch = new Stopwatch();
+
         public MainForm()
         {
             InitializeComponent();
